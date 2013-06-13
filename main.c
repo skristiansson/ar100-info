@@ -22,10 +22,10 @@
 #include "uart.h"
 #include "spr.h"
 
-#define print_spr(spr)	\
+#define print_spr(spr)		\
 	puts(#spr);		\
 	puts(" = 0x");		\
-	put_hex(mfspr(spr));		\
+	put_hex(mfspr(spr));	\
 	puts("\n");
 
 void putchar(char c)
