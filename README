@@ -1,0 +1,49 @@
+Introduction
+============
+A small OpenRISC 1000 baremetal application to be run on the Allwinner A31 SoC
+to gain some information about the AR100 core (an or1k implementation) present
+in that SoC.
+
+Usage
+=====
+The application is intended to be loaded into from the FEL mode with the 'fel'
+application available in https://github.com/linux-sunxi/sunxi-tools.
+
+Embedded in the OpenRISC 1000 binary is a small ARM "boot loader",
+which is intended to be run first, it's sole purpose is to deassert the
+reset line to the AR100 core.
+
+To build the ARM "boot loader":
+$ make -C ar100-boot/
+
+To build and load the OpenRISC baremetal application:
+$ make load
+
+A note about the SRAM and exception vectors
+===========================================
+AR100 uses an SRAM located at addresses 0x40000 - 0x54000
+(as seen from the ARM cores) as instruction and data memory.
+The OpenRISC 1000 architecture defines a generous space (0x100 bytes) for each
+exception vector i.e.
+
+0x100 vector0
+...
+0x200 vector1
+...
+0x300 vector3
+...
+etc
+
+This is rather memory consuming, especially if you are using an internal
+SRAM as the main memory.
+To avoid this, the Allwinner engineers have added address decode logic to
+the lower addresses of the SRAM, so that only the first word of each 0x100
+multiple is actually routed to the memory.
+The second word of each 0x100 multiple reads out as 0x15000000 = l.nop and the
+rest as 0x00000000.
+i.e. all exception vectors have to be implemented like this:
+
+l.j exception_handler
+ l.nop
+
+The actual contiguous SRAM memory starts at address 0x44000.
