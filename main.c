@@ -452,12 +452,108 @@ static int test_rori(void)
 
 int main(void)
 {
-	unsigned int spr;
+	unsigned int upr = mfspr(SPR_UPR);
+	unsigned int vr = mfspr(SPR_VR);
+	unsigned int iccfgr = mfspr(SPR_ICCFGR);
+	unsigned int dccfgr = mfspr(SPR_DCCFGR);
+	unsigned int immucfgr = mfspr(SPR_IMMUCFGR);
+	unsigned int dmmucfgr = mfspr(SPR_DMMUCFGR);
+	unsigned int cpucfgr = mfspr(SPR_CPUCFGR);
+	unsigned int ver = (vr & SPR_VR_VER) >> 24;
+	unsigned int rev = vr & SPR_VR_REV;
+	unsigned int block_size;
+	unsigned int set_size;
+	unsigned int ways;
 
 	gpio_init();
 	uart0_init();
 
 	puts("\n");
+
+	puts("OpenRISC-");
+	putchar(nibble_to_hex((char)(ver >> 4)));
+	putchar(nibble_to_hex((char)ver & 0xf));
+	puts("00 (rev ");
+	put_uint(rev);
+	puts(")\n");
+
+	if (upr & SPR_UPR_DCP) {
+		block_size = (dccfgr & SPR_DCCFGR_CBS) ? 32 : 16;
+		ways = 1 << (dccfgr & SPR_DCCFGR_NCW);
+		set_size = 1 << ((dccfgr & SPR_DCCFGR_NCS) >> 3);
+		puts("D-Cache: ");
+		put_uint(block_size*set_size*ways);
+		puts(" bytes, ");
+		put_uint(block_size);
+		puts(" bytes/line, ");
+		put_uint(ways);
+		puts(" way(s)\n");
+	} else {
+		puts("D-Cache: no\n");
+	}
+
+	if (upr & SPR_UPR_ICP) {
+		block_size = (iccfgr & SPR_ICCFGR_CBS) ? 32 : 16;
+		ways = 1 << (iccfgr & SPR_ICCFGR_NCW);
+		set_size = 1 << ((iccfgr & SPR_ICCFGR_NCS) >> 3);
+		puts("I-Cache: ");
+		put_uint(block_size*set_size*ways);
+		puts(" bytes, ");
+		put_uint(block_size);
+		puts(" bytes/line, ");
+		put_uint(ways);
+		puts(" way(s)\n");
+	} else {
+		puts("I-Cache: no\n");
+	}
+
+	if (upr & SPR_UPR_DMP) {
+		set_size = 1 << ((dmmucfgr & SPR_DMMUCFGR_NTS) >> 2);
+		ways = (dmmucfgr & SPR_DMMUCFGR_NTW) + 1;
+		puts("DMMU: ");
+		put_uint(set_size);
+		puts(" sets, ");
+		put_uint(ways);
+		puts(" way(s)\n");
+	} else {
+		puts("DMMU: no\n");
+	}
+
+	if (upr & SPR_UPR_IMP) {
+		set_size = 1 << ((immucfgr & SPR_IMMUCFGR_NTS) >> 2);
+		ways = (immucfgr & SPR_IMMUCFGR_NTW) + 1;
+		puts("IMMU: ");
+		put_uint(set_size);
+		puts(" sets, ");
+		put_uint(ways);
+		puts(" way(s)\n");
+	} else {
+		puts("IMMU: no\n");
+	}
+
+	puts("MAC unit: ");
+	(upr & SPR_UPR_MP) ? puts("yes\n") : puts("no\n");
+	puts("Debug unit: ");
+	(upr & SPR_UPR_DUP) ? puts("yes\n") : puts("no\n");
+	puts("Performance counters: ");
+	(upr & SPR_UPR_PCUP) ? puts("yes\n") : puts("no\n");
+	puts("Power management: ");
+	(upr & SPR_UPR_PMP) ? puts("yes\n") : puts("no\n");
+	puts("Interrupt controller: ");
+	(upr & SPR_UPR_PICP) ? puts("yes\n") : puts("no\n");
+	puts("Timer: ");
+	(upr & SPR_UPR_TTP) ? puts("yes\n") : puts("no\n");
+	puts("Custom unit(s): ");
+	(upr & SPR_UPR_CUP) ? puts("yes\n") : puts("no\n");
+
+	puts("ORBIS32: ");
+	(cpucfgr & SPR_CPUCFGR_OB32S) ? puts("yes\n") : puts("no\n");
+	puts("ORBIS64: ");
+	(cpucfgr & SPR_CPUCFGR_OB64S) ? puts("yes\n") : puts("no\n");
+	puts("ORFPX32: ");
+	(cpucfgr & SPR_CPUCFGR_OF32S) ? puts("yes\n") : puts("no\n");
+	puts("ORFPX64: ");
+	(cpucfgr & SPR_CPUCFGR_OF64S) ? puts("yes\n") : puts("no\n");
 
 	puts("Test support for l.addc...");
 	test_addc() ? puts("yes\n") : puts("no\n");
@@ -533,14 +629,6 @@ int main(void)
 
 	test_clk_freq();
 
-	puts("Dumping AR100 SPRs...\n");
-	print_spr(SPR_VR);
-	print_spr(SPR_UPR);
-	print_spr(SPR_CPUCFGR);
-	print_spr(SPR_DMMUCFGR);
-	print_spr(SPR_IMMUCFGR);
-	print_spr(SPR_DCCFGR);
-	print_spr(SPR_ICCFGR);
-
+	puts("done\n");
 	for (;;);
 }
