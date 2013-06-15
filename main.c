@@ -20,6 +20,7 @@
 #include "io.h"
 #include "gpio.h"
 #include "uart.h"
+#include "timer.h"
 #include "dram.h"
 #include "spr.h"
 
@@ -119,6 +120,21 @@ void test_dram(void)
 	puts("OK\n");
 }
 
+void test_timer(void)
+{
+	unsigned int time0, time1;
+	timer_enable();
+	timer_reset_ticks();
+	time0 = timer_get_ticks();
+	time1 = timer_get_ticks();
+
+	/* Check that the tick value has changed */
+	if (time0 != time1)
+		puts("OK\n");
+	else
+		puts("FAIL\n");
+}
+
 int main(void)
 {
 	unsigned int spr;
@@ -133,6 +149,9 @@ int main(void)
 	puts("done\n");
 	puts("Test DRAM read/write...");
 	test_dram();
+
+	puts("Test timer functionality...");
+	test_timer();
 
 	puts("Dumping AR100 SPRs...\n");
 	print_spr(SPR_VR);
