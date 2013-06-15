@@ -47,3 +47,56 @@ l.j exception_handler
  l.nop
 
 The actual contiguous SRAM memory starts at address 0x44000.
+
+Results (application output)
+============================
+OpenRISC-1200 (rev 1)
+D-Cache: no
+I-Cache: 4096 bytes, 16 bytes/line, 1 way(s)
+DMMU: no
+IMMU: no
+MAC unit: yes
+Debug unit: yes
+Performance counters: no
+Power management: yes
+Interrupt controller: yes
+Timer: yes
+Custom unit(s): no
+ORBIS32: yes
+ORBIS64: no
+ORFPX32: no
+ORFPX64: no
+Test support for l.addc...yes
+Test support for l.cmov...yes
+Test support for l.cust1...no
+Test support for l.cust2...no
+Test support for l.cust3...no
+Test support for l.cust4...no
+Test support for l.cust5...no
+Test support for l.cust6...no
+Test support for l.cust7...no
+Test support for l.cust8...no
+Test support for l.div...yes
+Test support for l.divu...yes
+Test support for l.extbs...yes
+Test support for l.extbz...yes
+Test support for l.exths...yes
+Test support for l.exthz...yes
+Test support for l.extws...yes
+Test support for l.extwz...yes
+Test support for l.ff1...yes
+Test support for l.fl1...yes
+Test support for l.lws...no
+Test support for l.mac...yes
+Test support for l.maci...yes
+Test support for l.macrc...yes
+Test support for l.mul...yes
+Test support for l.muli...yes
+Test support for l.mulu...yes
+Test support for l.ror...yes
+Test support for l.rori...yes
+Init DRAM...done
+Test DRAM read/write...OK
+Test timer functionality...OK
+Test CLK freq...26 MHz
+done
