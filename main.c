@@ -20,6 +20,7 @@
 #include "io.h"
 #include "gpio.h"
 #include "uart.h"
+#include "dram.h"
 #include "spr.h"
 
 #define print_spr(spr)		\
@@ -98,12 +99,40 @@ void gpio_init()
 	sunxi_gpio_set_cfgpin(SUNXI_GPF(4), SUNXI_GPF4_UART0_RX);
 }
 
+/* Write a couple of words into the DRAM and read them back */
+void test_dram(void)
+{
+	int i;
+	volatile unsigned int *dram = (volatile unsigned int *)0x40000000;
+
+	for (i = 0; i < 1024; i++)
+		dram[i] = i;
+
+	for (i = 0; i < 1024; i++) {
+		if (dram[i] != i) {
+			puts("FAIL\n");
+			return;
+		}
+
+	}
+
+	puts("OK\n");
+}
+
 int main(void)
 {
 	unsigned int spr;
 
 	gpio_init();
 	uart0_init();
+
+	puts("\n");
+
+	puts("Init DRAM...");
+	mctl_init();
+	puts("done\n");
+	puts("Test DRAM read/write...");
+	test_dram();
 
 	puts("Dumping AR100 SPRs...\n");
 	print_spr(SPR_VR);

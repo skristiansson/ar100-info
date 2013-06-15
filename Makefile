@@ -19,6 +19,7 @@ TARGET = main.c
 SRC = $(TARGET)
 SRC += uart.c
 SRC += gpio.c
+SRC += dram_sun6i.c
 
 SSRC = start.S
 
