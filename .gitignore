@@ -1,0 +1,6 @@
+*~
+*.o
+*.bin
+*.code
+ar100-boot
+ar100-info
