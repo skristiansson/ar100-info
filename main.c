@@ -89,6 +89,22 @@ static void put_hex(unsigned int hex)
 	}
 }
 
+#define BUF_LEN 12
+static void put_uint(unsigned int value)
+{
+	char buf[BUF_LEN];
+	char *p = &buf[BUF_LEN-1];
+
+	*p = '\0';
+
+	while (value) {
+		*--p = '0' + value%10;
+		value /= 10;
+	}
+
+	puts(p);
+}
+
 void gpio_init()
 {
 	/* setup UART0 to PORTF */
@@ -135,6 +151,34 @@ void test_timer(void)
 		puts("FAIL\n");
 }
 
+/*
+ * Crude clock frequency detection routine.
+ * Prints a string on the uart and measures the number of ticks (clock cycles)
+ * that has elapsed.
+ * The real time that has elapsed can roughly be calculated as:
+ * time = num_chars * bits_per_char / baud_rate
+ * and the clock frequency can be calculated as:
+ * freq = ticks / time
+ */
+void test_clk_freq(void)
+{
+	unsigned int time0, time1;
+	unsigned int clk_freq;
+
+	timer_enable();
+	timer_reset_ticks();
+
+	time0 = timer_get_ticks();
+	puts("Test CLK freq...");
+	time1 = timer_get_ticks();
+
+	clk_freq = (time1 - time0)*115200/(10*16);
+	clk_freq /= 1e6;
+
+	put_uint(clk_freq);
+	puts(" MHz\n");
+}
+
 int main(void)
 {
 	unsigned int spr;
@@ -152,6 +196,8 @@ int main(void)
 
 	puts("Test timer functionality...");
 	test_timer();
+
+	test_clk_freq();
 
 	puts("Dumping AR100 SPRs...\n");
 	print_spr(SPR_VR);
