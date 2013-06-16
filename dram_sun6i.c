@@ -26,8 +26,6 @@
  */
 #include "io.h"
 #include "dram.h"
-#include "clock.h"
-//#include <asm/arch/sys_proto.h>
 
 extern void puts(char *s);
 
