@@ -100,6 +100,9 @@ static void put_uint(unsigned int value)
 
 	*p = '\0';
 
+	if (!value)
+		*--p = '0';
+
 	while (value) {
 		*--p = '0' + value%10;
 		value /= 10;
