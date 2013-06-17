@@ -156,31 +156,50 @@ void test_timer(void)
 }
 
 /*
- * Crude clock frequency detection routine.
- * Prints a string on the uart and measures the number of ticks (clock cycles)
- * that has elapsed.
- * The real time that has elapsed can roughly be calculated as:
- * time = num_chars * bits_per_char / baud_rate
- * and the clock frequency can be calculated as:
- * freq = ticks / time
+ * Clock frequency detection routine.
+ * Compares the internal AR100 timer with the AVS0 timer.
  */
+#define TMR_AVS0_VAL	(AW_TIMER_BASE + 0x0084)
+#define TMR_AVS_DIV	(AW_TIMER_BASE + 0x008C)
 void test_clk_freq(void)
 {
+	int i;
+	unsigned int tmr_avs0_val0, tmr_avs0_val1;
+	unsigned int tmr_avs0_div;
 	unsigned int time0, time1;
+	unsigned int delta;
 	unsigned int clk_freq;
 
+	puts("Test CLK freq...");
 	timer_enable();
 	timer_reset_ticks();
 
+	tmr_avs0_div = readl(TMR_AVS_DIV) & 0xffff;
+
+	tmr_avs0_val0 = readl(TMR_AVS0_VAL);
 	time0 = timer_get_ticks();
-	puts("Test CLK freq...");
+	do {
+		tmr_avs0_val1 = readl(TMR_AVS0_VAL);
+		if (tmr_avs0_val1 >= tmr_avs0_val0)
+			delta = tmr_avs0_val1 - tmr_avs0_val0;
+		else
+			delta = 0xffffffff - (tmr_avs0_val0 - tmr_avs0_val1);
+	} while (delta < 1000);
+
 	time1 = timer_get_ticks();
+	delta = time1 - time0;
 
-	clk_freq = (time1 - time0)*115200/(10*16);
-	clk_freq /= 1e6;
+	clk_freq = delta*((tmr_avs0_div*2000)/24e6);
+	clk_freq = (clk_freq + 500) / 1e3;
 
-	put_uint(clk_freq);
-	puts(" MHz\n");
+	if (clk_freq < 1000) {
+		put_uint(clk_freq);
+		puts(" KHz\n");
+	} else {
+		clk_freq = (clk_freq + 500) / 1e3;
+		put_uint(clk_freq);
+		puts(" MHz\n");
+	}
 }
 
 int main(void)
