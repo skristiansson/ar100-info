@@ -98,5 +98,26 @@ Test support for l.rori...yes
 Init DRAM...done
 Test DRAM read/write...OK
 Test timer functionality...OK
-Test CLK freq...26 MHz
-done
+Set clock source to LOSC...done
+Test CLK freq...33 KHz
+Set clock source to HOSC (POSTDIV=0, DIV=0)...done
+Test CLK freq...24 MHz
+Set clock source to HOSC (POSTDIV=0, DIV=1)...done
+Test CLK freq...12 MHz
+Set clock source to HOSC (POSTDIV=1, DIV=1)...done
+Test CLK freq...12 MHz
+Setup PLL6 (M=1, K=1, N=24)...done
+Set clock source to PLL6 (POSTDIV=1, DIV=0)...done
+Test CLK freq...300 MHz
+Set clock source to PLL6 (POSTDIV=2, DIV=0)...done
+Test CLK freq...200 MHz
+Set clock source to PLL6 (POSTDIV=2, DIV=1)...done
+Test CLK freq...100 MHz
+Setup PLL6 (M=2, K=1, N=24)...done
+Test CLK freq...100 MHz
+Setup PLL6 (M=1, K=2, N=24)...done
+Test CLK freq...150 MHz
+Setup PLL6 (M=1, K=1, N=12)...done
+Test CLK freq...52 MHz
+Restore clock config to original state...done
+All tests completed!
