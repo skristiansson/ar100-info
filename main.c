@@ -31,8 +31,6 @@
 	put_hex(mfspr(spr));	\
 	puts("\n");
 
-extern volatile unsigned int illegal_instruction;
-
 void putchar(char c)
 {
 	uart0_putc(c);
