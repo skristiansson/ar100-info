@@ -22,6 +22,7 @@
 #include "uart.h"
 #include "timer.h"
 #include "dram.h"
+#include "clock.h"
 #include "spr.h"
 #include "instruction_tests.h"
 
@@ -202,6 +203,155 @@ void test_clk_freq(void)
 	}
 }
 
+void test_clk_config(void)
+{
+	unsigned int ar100_clkcfg_reg;
+	unsigned int old_ar100_clkcfg_reg;
+	unsigned int pll6_ctrl_reg;
+	unsigned int old_pll6_ctrl_reg;
+
+	puts("Set clock source to LOSC...");
+	old_ar100_clkcfg_reg = ar100_clkcfg_reg = readl(AR100_CLKCFG_REG);
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_SRC_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_SRC_LOSC;
+	writel(ar100_clkcfg_reg, AR100_CLKCFG_REG);
+	puts("done\n");
+
+	test_clk_freq();
+
+	puts("Set clock source to HOSC (POSTDIV=0, DIV=0)...");
+	ar100_clkcfg_reg = readl(AR100_CLKCFG_REG);
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_SRC_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_SRC_HOSC;
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_POSTDIV_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_POSTDIV(0);
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_DIV_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_DIV(0);
+	writel(ar100_clkcfg_reg, AR100_CLKCFG_REG);
+	puts("done\n");
+
+	test_clk_freq();
+
+	puts("Set clock source to HOSC (POSTDIV=0, DIV=1)...");
+	ar100_clkcfg_reg = readl(AR100_CLKCFG_REG);
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_SRC_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_SRC_HOSC;
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_POSTDIV_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_POSTDIV(0);
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_DIV_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_DIV(1);
+	writel(ar100_clkcfg_reg, AR100_CLKCFG_REG);
+	puts("done\n");
+
+	test_clk_freq();
+
+	puts("Set clock source to HOSC (POSTDIV=1, DIV=1)...");
+	ar100_clkcfg_reg = readl(AR100_CLKCFG_REG);
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_SRC_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_SRC_HOSC;
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_POSTDIV_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_POSTDIV(1);
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_DIV_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_DIV(1);
+	writel(ar100_clkcfg_reg, AR100_CLKCFG_REG);
+	puts("done\n");
+
+	test_clk_freq();
+
+	puts("Setup PLL6 (M=1, K=1, N=24)...");
+	old_pll6_ctrl_reg = pll6_ctrl_reg = readl(PLL6_CTRL_REG);
+	pll6_ctrl_reg &= ~PLL6_CTRL_M_MASK;
+	pll6_ctrl_reg |= PLL6_CTRL_M(1);
+	pll6_ctrl_reg &= ~PLL6_CTRL_K_MASK;
+	pll6_ctrl_reg |= PLL6_CTRL_K(1);
+	pll6_ctrl_reg &= ~PLL6_CTRL_N_MASK;
+	pll6_ctrl_reg |= PLL6_CTRL_N(24);
+	pll6_ctrl_reg |= (PLL6_CTRL_ENABLE | PLL6_CTRL_CLK_OUTEN);
+	writel(pll6_ctrl_reg, PLL6_CTRL_REG);
+	puts("done\n");
+
+	puts("Set clock source to PLL6 (POSTDIV=1, DIV=0)...");
+	ar100_clkcfg_reg = readl(AR100_CLKCFG_REG);
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_SRC_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_SRC_PLL6;
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_POSTDIV_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_POSTDIV(1);
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_DIV_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_DIV(0);
+	writel(ar100_clkcfg_reg, AR100_CLKCFG_REG);
+	puts("done\n");
+
+	test_clk_freq();
+
+	puts("Set clock source to PLL6 (POSTDIV=2, DIV=0)...");
+	ar100_clkcfg_reg = readl(AR100_CLKCFG_REG);
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_SRC_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_SRC_PLL6;
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_POSTDIV_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_POSTDIV(2);
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_DIV_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_DIV(0);
+	writel(ar100_clkcfg_reg, AR100_CLKCFG_REG);
+	puts("done\n");
+
+	test_clk_freq();
+
+	puts("Set clock source to PLL6 (POSTDIV=2, DIV=1)...");
+	ar100_clkcfg_reg = readl(AR100_CLKCFG_REG);
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_SRC_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_SRC_PLL6;
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_POSTDIV_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_POSTDIV(2);
+	ar100_clkcfg_reg &= ~AR100_CLKCFG_DIV_MASK;
+	ar100_clkcfg_reg |= AR100_CLKCFG_DIV(1);
+	writel(ar100_clkcfg_reg, AR100_CLKCFG_REG);
+	puts("done\n");
+
+	test_clk_freq();
+
+	puts("Setup PLL6 (M=2, K=1, N=24)...");
+	pll6_ctrl_reg &= ~PLL6_CTRL_M_MASK;
+	pll6_ctrl_reg |= PLL6_CTRL_M(2);
+	pll6_ctrl_reg &= ~PLL6_CTRL_K_MASK;
+	pll6_ctrl_reg |= PLL6_CTRL_K(1);
+	pll6_ctrl_reg &= ~PLL6_CTRL_N_MASK;
+	pll6_ctrl_reg |= PLL6_CTRL_N(24);
+	writel(pll6_ctrl_reg, PLL6_CTRL_REG);
+	puts("done\n");
+
+	test_clk_freq();
+
+	puts("Setup PLL6 (M=1, K=2, N=24)...");
+	pll6_ctrl_reg &= ~PLL6_CTRL_M_MASK;
+	pll6_ctrl_reg |= PLL6_CTRL_M(1);
+	pll6_ctrl_reg &= ~PLL6_CTRL_K_MASK;
+	pll6_ctrl_reg |= PLL6_CTRL_K(2);
+	pll6_ctrl_reg &= ~PLL6_CTRL_N_MASK;
+	pll6_ctrl_reg |= PLL6_CTRL_N(24);
+	writel(pll6_ctrl_reg, PLL6_CTRL_REG);
+	puts("done\n");
+
+	test_clk_freq();
+
+	puts("Setup PLL6 (M=1, K=1, N=12)...");
+	pll6_ctrl_reg &= ~PLL6_CTRL_M_MASK;
+	pll6_ctrl_reg |= PLL6_CTRL_M(1);
+	pll6_ctrl_reg &= ~PLL6_CTRL_K_MASK;
+	pll6_ctrl_reg |= PLL6_CTRL_K(1);
+	pll6_ctrl_reg &= ~PLL6_CTRL_N_MASK;
+	pll6_ctrl_reg |= PLL6_CTRL_N(12);
+	writel(pll6_ctrl_reg, PLL6_CTRL_REG);
+	puts("done\n");
+
+	test_clk_freq();
+
+	/* restore regs */
+	puts("Restore clock config to original state...");
+	writel(old_ar100_clkcfg_reg, AR100_CLKCFG_REG);
+	writel(old_pll6_ctrl_reg, PLL6_CTRL_REG);
+	puts("done\n");
+}
+
 int main(void)
 {
 	unsigned int upr = mfspr(SPR_UPR);
@@ -379,8 +529,8 @@ int main(void)
 	puts("Test timer functionality...");
 	test_timer();
 
-	test_clk_freq();
+	test_clk_config();
 
-	puts("done\n");
+	puts("All tests completed!\n");
 	for (;;);
 }
