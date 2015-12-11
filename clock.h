@@ -53,6 +53,31 @@
 #define PLL6_CTRL_M(x)			(((x) & 0x3) << 0)
 #define PLL6_CTRL_M_MASK		(0x3 << 0)
 
+/* apb2 bit field */
+#define APB2_CLK_SRC_LOSC		(0x0 << 24)
+#define APB2_CLK_SRC_OSC24M		(0x1 << 24)
+#define APB2_CLK_SRC_PLL6		(0x2 << 24)
+#define APB2_CLK_SRC_MASK		(0x3 << 24)
+#define APB2_CLK_RATE_N_1		(0x0 << 16)
+#define APB2_CLK_RATE_N_2		(0x1 << 16)
+#define APB2_CLK_RATE_N_4		(0x2 << 16)
+#define APB2_CLK_RATE_N_8		(0x3 << 16)
+#define APB2_CLK_RATE_N_MASK		(3 << 16)
+#define APB2_CLK_RATE_M(m)		(((m)-1) << 0)
+#define APB2_CLK_RATE_M_MASK            (0x1f << 0)
+
+/* apb2 gate field */
+#define APB2_GATE_UART_SHIFT	(16)
+#define APB2_GATE_UART_MASK		(0xff << APB2_GATE_UART_SHIFT)
+#define APB2_GATE_TWI_SHIFT	(0)
+#define APB2_GATE_TWI_MASK		(0xf << APB2_GATE_TWI_SHIFT)
+
+/* apb2 reset */
+#define APB2_RESET_UART_SHIFT		(16)
+#define APB2_RESET_UART_MASK		(0xff << APB2_RESET_UART_SHIFT)
+#define APB2_RESET_TWI_SHIFT		(0)
+#define APB2_RESET_TWI_MASK		(0xf << APB2_RESET_TWI_SHIFT)
+
 /*
  * AR100 clock configuration register:
  * [31:18] Reserved

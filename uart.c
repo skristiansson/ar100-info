@@ -26,9 +26,35 @@
 
 #include "io.h"
 #include "uart.h"
+#include "clock.h"
+
+#define CONFIG_CONS_INDEX 1
+
+#define APB2_DIV	(AW_CCM_BASE + 0x058)
+#define APB2_GATE	(AW_CCM_BASE + 0x06C)
+#define APB2_RESET	(AW_CCM_BASE + 0x2D8)
+
+void clock_init_uart(void)
+{
+	/* uart clock source is apb2 */
+	writel(APB2_CLK_SRC_OSC24M|
+	       APB2_CLK_RATE_N_1|
+	       APB2_CLK_RATE_M(1),
+	       APB2_GATE);
+
+	/* open the clock for uart */
+	set_wbit(APB2_GATE, 1 << (APB2_GATE_UART_SHIFT +
+				  CONFIG_CONS_INDEX - 1));
+
+	/* deassert uart reset */
+	set_wbit(APB2_RESET, 1 << (APB2_RESET_UART_SHIFT +
+				   CONFIG_CONS_INDEX - 1));
+}
 
 void uart0_init(void)
 {
+	clock_init_uart();
+
 	/* select dll dlh */
 	writel(0x80, UART0_LCR);
 	/* set baudrate */

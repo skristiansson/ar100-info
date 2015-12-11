@@ -129,13 +129,18 @@ int soc_is_h3(void)
 
 void gpio_init()
 {
-	/* setup UART0 to PORTF */
-	/* disable GPH20,21 as uart0 tx,rx to avoid conflict */
-	gpio_direction_input(SUNXI_GPH(20));
-	gpio_direction_input(SUNXI_GPH(21));
-	/* Setup GPF2,4 as uart0 tx,rx */
-	sunxi_gpio_set_cfgpin(SUNXI_GPF(2), SUNXI_GPF2_UART0_TX);
-	sunxi_gpio_set_cfgpin(SUNXI_GPF(4), SUNXI_GPF4_UART0_RX);
+	if (soc_is_h3()) {
+		sunxi_gpio_set_cfgpin(SUNXI_GPA(4), SUN8I_H3_GPA_UART0);
+		sunxi_gpio_set_cfgpin(SUNXI_GPA(5), SUN8I_H3_GPA_UART0);
+	} else {
+		/* setup UART0 to PORTF */
+		/* disable GPH20,21 as uart0 tx,rx to avoid conflict */
+		gpio_direction_input(SUNXI_GPH(20));
+		gpio_direction_input(SUNXI_GPH(21));
+		/* Setup GPF2,4 as uart0 tx,rx */
+		sunxi_gpio_set_cfgpin(SUNXI_GPF(2), SUNXI_GPF2_UART0_TX);
+		sunxi_gpio_set_cfgpin(SUNXI_GPF(4), SUNXI_GPF4_UART0_RX);
+	}
 }
 
 /* Write a couple of words into the DRAM and read them back */
