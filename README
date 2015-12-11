@@ -7,7 +7,7 @@ in that SoC.
 Usage
 =====
 The application is intended to be loaded into SRAM from the FEL mode with the
-'fel' tool available from https://github.com/linux-sunxi/sunxi-tools.
+'sunxi-fel' tool available from https://github.com/linux-sunxi/sunxi-tools.
 
 Embedded in the OpenRISC 1000 binary is a small ARM "boot loader",
 which is intended to be run first, it's sole purpose is to deassert the

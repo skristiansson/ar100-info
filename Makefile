@@ -6,7 +6,7 @@ LD =  $(CROSS_COMPILE)ld
 OBJCOPY = $(CROSS_COMPILE)objcopy
 OBJDUMP = $(CROSS_COMPILE)objdump
 REMOVE = rm -rf
-FEL ?= fel
+FEL ?= sunxi-fel
 
 # Compiler flags
 CFLAGS = -O2 -fno-common -fno-builtin -ffreestanding
