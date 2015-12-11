@@ -74,6 +74,9 @@ void uart0_putc(char c)
 
 void uart0_puts(const char *s)
 {
-	while(*s)
+	while(*s) {
+		if (*s == '\n')
+			uart0_putc('\r');
 		uart0_putc(*s++);
+	}
 }
