@@ -1,8 +1,8 @@
 Introduction
 ============
-A small OpenRISC 1000 baremetal application to be run on the Allwinner A31 SoC
-to gain some information about the AR100 core (an or1k implementation) present
-in that SoC.
+A small OpenRISC 1000 baremetal application to be run on the Allwinner A31
+and Allwinner H3 SoCs to gain some information about the AR100 core (an or1k
+implementation) present in that SoCs.
 
 Usage
 =====
@@ -46,7 +46,8 @@ i.e. all exception vectors have to be implemented like this:
 l.j exception_handler
  l.nop
 
-The actual contiguous SRAM memory starts at address 0x44000.
+The actual contiguous SRAM memory starts at address 0x44000. The size of this
+contiguous SRAM memory is 64 KiB in Allwinner A31 and 32 KiB in Allwinner H3.
 
 Results (application output)
 ============================
