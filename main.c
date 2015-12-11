@@ -110,6 +110,23 @@ static void put_uint(unsigned int value)
 	puts(p);
 }
 
+#define SRAM_VER_REG	(AW_SRAMCTRL_BASE + 0x24)
+
+void soc_detection_init(void)
+{
+	set_wbit(SRAM_VER_REG, 1 << 15);
+}
+
+int soc_is_a31(void)
+{
+	return (readl(SRAM_VER_REG) >> 16) == 0x1633;
+}
+
+int soc_is_h3(void)
+{
+	return (readl(SRAM_VER_REG) >> 16) == 0x1680;
+}
+
 void gpio_init()
 {
 	/* setup UART0 to PORTF */
@@ -376,6 +393,7 @@ int main(void)
 	unsigned int set_size;
 	unsigned int ways;
 
+	soc_detection_init();
 	gpio_init();
 	uart0_init();
 
@@ -529,11 +547,13 @@ int main(void)
 	puts("Test support for l.rori...");
 	test_rori() ? puts("yes\n") : puts("no\n");
 
-	puts("Init DRAM...");
-	mctl_init();
-	puts("done\n");
-	puts("Test DRAM read/write...");
-	test_dram();
+	if (soc_is_a31()) {
+		puts("Init DRAM...");
+		mctl_init();
+		puts("done\n");
+		puts("Test DRAM read/write...");
+		test_dram();
+	}
 
 	puts("Test timer functionality...");
 	test_timer();
