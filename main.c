@@ -162,6 +162,8 @@ void test_timer(void)
  */
 #define TMR_AVS0_VAL	(AW_TIMER_BASE + 0x0084)
 #define TMR_AVS_DIV	(AW_TIMER_BASE + 0x008C)
+#define AVS_CLK		(AW_CCM_BASE   + 0x0144)
+#define AVS_CNT_CTL	(AW_TIMER_BASE + 0x0080)
 void test_clk_freq(void)
 {
 	int i;
@@ -175,8 +177,15 @@ void test_clk_freq(void)
 	timer_enable();
 	timer_reset_ticks();
 
-	tmr_avs0_div = readl(TMR_AVS_DIV) & 0xffff;
+	set_wbit(AVS_CLK, 1 << 31);
+	set_wbit(AVS_CNT_CTL, 1);
 
+	tmr_avs0_div = (readl(TMR_AVS_DIV) & 0x7ff) + 1;
+
+	/*
+	 * AVS0 reads high 32 bits of a 33-bit counter, so effectively we are
+	 * dealing with a counter, which runs at (12 MHz / div) clock speed.
+	 */
 	tmr_avs0_val0 = readl(TMR_AVS0_VAL);
 	time0 = timer_get_ticks();
 	do {
@@ -190,8 +199,8 @@ void test_clk_freq(void)
 	time1 = timer_get_ticks();
 	delta = time1 - time0;
 
-	clk_freq = delta*((tmr_avs0_div*2000)/24e6);
-	clk_freq = (clk_freq + 500) / 1e3;
+	clk_freq = (uint64_t)delta * 12000 / tmr_avs0_div;
+	clk_freq = (clk_freq + 500) / 1000;
 
 	if (clk_freq < 1000) {
 		put_uint(clk_freq);
