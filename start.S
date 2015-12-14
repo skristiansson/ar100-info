@@ -47,7 +47,7 @@ ar100_boot:
 
 reset:
 	l.movhi	r0,0
-	l.ori	r1, r0, 0x7ffc
+	l.ori	r1, r0, 0xbffc
 	l.j	main
 	 l.nop
 
