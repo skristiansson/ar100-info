@@ -228,7 +228,7 @@ void test_clk_freq(void)
 		put_uint(clk_freq);
 		puts(" KHz\n");
 	} else {
-		clk_freq = (clk_freq + 500) / 1e3;
+		clk_freq = (clk_freq + 500) / 1000;
 		put_uint(clk_freq);
 		puts(" MHz\n");
 	}
