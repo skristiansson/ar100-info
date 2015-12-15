@@ -16,6 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
  * MA 02111-1307 USA
  */
+
+#include <or1k-support.h>
 #include "cpu.h"
 #include "io.h"
 #include "gpio.h"
@@ -108,6 +110,17 @@ static void put_uint(unsigned int value)
 	}
 
 	puts(p);
+}
+
+/* Present as floating point with one decimal digit in the fractional part */
+static void put_uint_div_by_10(unsigned int value)
+{
+	if (value >= 10)
+		put_uint(value / 10);
+	else
+		puts("0");
+	puts(".");
+	put_uint(value % 10);
 }
 
 #define SRAM_VER_REG	(AW_SRAMCTRL_BASE + 0x24)
@@ -234,6 +247,124 @@ void test_clk_freq(void)
 	}
 }
 
+void pointer_chasing(int count, void **addr)
+{
+	void *old = *addr;
+	*addr = addr;
+	count = (count + 25) / 50;
+	while (count--) {
+		asm volatile(".rept 50\n"
+			     "    l.lwz %0, 0(%0)\n"
+			     ".endr\n"
+			     : "+r" (addr));
+	}
+	*addr = old;
+}
+
+void pointer_chasing_plus_nop(int count, void **addr)
+{
+	void *old = *addr;
+	*addr = addr;
+	count = (count + 25) / 50;
+	while (count--) {
+		asm volatile(".rept 50\n"
+			     "    l.lwz %0, 0(%0)\n"
+			     "    l.nop\n"
+			     ".endr\n"
+			     : "+r" (addr));
+	}
+	*addr = old;
+}
+
+void unrolled_nops(int count)
+{
+	count = (count + 25) / 50;
+	while (count--) {
+		asm volatile(".rept 50\n"
+			     "    l.nop\n"
+			     ".endr\n");
+	}
+}
+
+void empty_loop(int count)
+{
+	count = (count + 25) / 50;
+	while (count--) {
+		asm volatile("");
+	}
+}
+
+void enable_caches(void)
+{
+	unsigned addr;
+	/* Flush I-cache for the whole SRAM A2 (cargo cult?) */
+	for (addr = 0; addr < 16 * 1024 + 32 * 1024; addr += 16)
+		or1k_icache_flush(addr);
+	or1k_icache_enable();
+}
+
+void disable_caches(void)
+{
+	or1k_icache_disable();
+}
+
+void test_mem_latency(char *label, void **addr)
+{
+	int count = 1000000;
+	unsigned t1, t2, t3, t4;
+	unsigned loop_overhead;
+
+	timer_enable();
+	timer_reset_ticks();
+
+	t1 = timer_get_ticks();
+	pointer_chasing(count, addr);
+	t2 = timer_get_ticks();
+	pointer_chasing_plus_nop(count, addr);
+	t3 = timer_get_ticks();
+	unrolled_nops(count);
+	t4 = timer_get_ticks();
+	empty_loop(count);
+	loop_overhead = timer_get_ticks() - t4;
+
+	puts(label);
+
+	puts("\n");
+	puts("      Instructions fetch : ");
+	put_uint_div_by_10((t4 - t3 - loop_overhead) * 10 / count);
+	puts(" cycles per instruction\n");
+
+	puts("      Back-to-back L.LWZ : ");
+	put_uint_div_by_10((t2 - t1 - loop_overhead) * 10 / count);
+	puts(" cycles per 32-bit read\n");
+
+	puts("           L.LWZ + L.NOP : ");
+	put_uint_div_by_10((t3 - t2 - loop_overhead) * 10 / count);
+	puts(" cycles per 32-bit read\n");
+}
+
+void benchmark(void)
+{
+	void *dummy;
+
+	enable_caches();
+	puts("\n  == Benchmark ==\n");
+	test_mem_latency("   == Code in SRAM A2 (I-cache ON), data in SRAM A2 ==",
+			 &dummy);
+	test_mem_latency("   == Code in SRAM A2 (I-cache ON), data in SRAM A1 ==",
+			 (void *)0x40000);
+
+	disable_caches();
+	puts("\n");
+	test_mem_latency("   == Code in SRAM A2 (I-cache OFF), data in SRAM A2 ==",
+			 &dummy);
+	test_mem_latency("   == Code in SRAM A2 (I-cache OFF), data in SRAM A1 ==",
+			 (void *)0x40000);
+
+	puts("\n");
+}
+
+
 void test_clk_config(void)
 {
 	unsigned int ar100_clkcfg_reg;
@@ -313,6 +444,7 @@ void test_clk_config(void)
 	puts("done\n");
 
 	test_clk_freq();
+	benchmark();
 
 	puts("Set clock source to PLL6 (POSTDIV=2, DIV=0)...");
 	ar100_clkcfg_reg = readl(AR100_CLKCFG_REG);
