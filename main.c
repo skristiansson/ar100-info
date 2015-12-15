@@ -699,10 +699,13 @@ int main(void)
 	puts("Test support for l.rori...");
 	test_rori() ? puts("yes\n") : puts("no\n");
 
-	if (soc_is_a31()) {
+	if (soc_is_a31() && !dram_is_clocked()) {
 		puts("Init DRAM...");
 		mctl_init();
 		puts("done\n");
+	}
+
+	if (dram_is_clocked()) {
 		puts("Test DRAM read/write...");
 		test_dram();
 	}
