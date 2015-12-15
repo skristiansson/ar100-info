@@ -140,6 +140,11 @@ int soc_is_h3(void)
 	return (readl(SRAM_VER_REG) >> 16) == 0x1680;
 }
 
+int dram_is_clocked(void)
+{
+    return readl(CCU_PLL5CFG) & (1 << 31);
+}
+
 void gpio_init()
 {
 	if (soc_is_h3()) {
@@ -353,6 +358,11 @@ void benchmark(void)
 			 &dummy);
 	test_mem_latency("   == Code in SRAM A2 (I-cache ON), data in SRAM A1 ==",
 			 (void *)0x40000);
+	if (dram_is_clocked()) {
+		test_mem_latency(
+			 "   == Code in SRAM A2 (I-cache ON), data in DRAM ==",
+			 (void *)0x40000000);
+	}
 
 	disable_caches();
 	puts("\n");
@@ -360,6 +370,11 @@ void benchmark(void)
 			 &dummy);
 	test_mem_latency("   == Code in SRAM A2 (I-cache OFF), data in SRAM A1 ==",
 			 (void *)0x40000);
+	if (dram_is_clocked()) {
+		test_mem_latency(
+			 "   == Code in SRAM A2 (I-cache OFF), data in DRAM ==",
+			 (void *)0x40000000);
+	}
 
 	puts("\n");
 }
